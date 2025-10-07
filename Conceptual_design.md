@@ -1,14 +1,6 @@
 # SecurCore - Conceptual Design Document
 ## CS221 Data Structures and Algorithms - Deliverable 1
 
-### Team Members
-- [Student 1 Name] - [Roll Number 1]
-- [Student 2 Name] - [Roll Number 2] 
-- [Student 3 Name] - [Roll Number 3]
-
-**Submission Date**: October 7, 2024  
-**Course**: CS221 - Data Structures and Algorithms
-
 ---
 
 ## 1. System Architecture Overview
