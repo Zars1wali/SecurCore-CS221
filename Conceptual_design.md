@@ -1,6 +1,6 @@
 # SecurCore - Conceptual Design Document
-## CS221 Data Structures and Algorithms - Deliverable 1
-
+## CS221 Data Structures and Algorithms - Deliverable 2
+19/10/25
 ---
 
 ## 1. System Architecture Overview
