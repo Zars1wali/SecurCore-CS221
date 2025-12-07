@@ -6,7 +6,6 @@ A comprehensive password manager and security analytics tool for CS221 Data Stru
 **SecurCore** is an advanced password manager and security analytics tool that demonstrates practical applications of data structures and algorithms in cybersecurity.
 
 ## 👥 Team Members
-- Umer Wali - 2023736
 - Hamza Mehboob - 2024392
 
 
@@ -19,9 +18,9 @@ A comprehensive password manager and security analytics tool for CS221 Data Stru
 | Deliverable | Deadline | Status |
 |-------------|----------|--------|
 | [Deliverable 1: Project Proposal](Deliverable-1/) | 07/10 | ✅ Completed |
-| Deliverable 2: Initial Implementation | 19/10 | ⌛ Pending |
-| Deliverable 3: Implementation Phase 2 | 28/11 | ⌛ Pending |
-| Deliverable 4: Final Submission | 05/12 | ⌛ Pending |
+| Deliverable 2: Initial Implementation | 19/10 |  ✅ Completed  |
+| Deliverable 3: Implementation Phase 2 | 28/11 | ✅ Completed |
+| Deliverable 4: Final Submission | 05/12 | ✅ Completed |
 
 ## 🚀 Quick Start
 ```bash
