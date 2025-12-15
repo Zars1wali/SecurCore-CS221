@@ -1,3 +1,4 @@
+
 #include <iostream>
 using namespace std;
 
@@ -10,6 +11,20 @@ struct Credential {
     string password_hash;
     Credential* next;
     Credential* prev;
+};
+
+// BST Node structure
+struct BSTNode {
+    string website;
+    Credential* credential_ptr; // Points to credential in linked list
+    BSTNode* left;
+    BSTNode* right;
+};
+
+// Binary Search Tree manager
+struct BinarySearchTree {
+    BSTNode* root;
+    int size;
 };
 
 // Stack node for undo operations
@@ -107,6 +122,149 @@ void freeCredential(Credential* cred) {
     }
 }
 
+// ==================== BINARY SEARCH TREE FUNCTIONS ====================
+
+// Create a new BST node
+BSTNode* createBSTNode(const string& website, Credential* cred_ptr) {
+    BSTNode* new_node = new BSTNode;
+    new_node->website = website;
+    new_node->credential_ptr = cred_ptr;
+    new_node->left = 0;
+    new_node->right = 0;
+    return new_node;
+}
+
+// Initialize BST
+void initBST(BinarySearchTree* bst) {
+    bst->root = 0;
+    bst->size = 0;
+}
+
+// Insert node into BST
+BSTNode* insertBSTNode(BSTNode* root, const string& website, Credential* cred_ptr) {
+    if (root == 0) {
+        return createBSTNode(website, cred_ptr);
+    }
+    
+    if (website < root->website) {
+        root->left = insertBSTNode(root->left, website, cred_ptr);
+    } else if (website > root->website) {
+        root->right = insertBSTNode(root->right, website, cred_ptr);
+    }
+    
+    return root;
+}
+
+// Insert into BST (wrapper function)
+void insertBST(BinarySearchTree* bst, const string& website, Credential* cred_ptr) {
+    bst->root = insertBSTNode(bst->root, website, cred_ptr);
+    bst->size++;
+}
+
+// Search in BST
+BSTNode* searchBSTNode(BSTNode* root, const string& website) {
+    if (root == 0 || root->website == website) {
+        return root;
+    }
+    
+    if (website < root->website) {
+        return searchBSTNode(root->left, website);
+    }
+    
+    return searchBSTNode(root->right, website);
+}
+
+// Search in BST (wrapper function)
+BSTNode* searchBST(BinarySearchTree* bst, const string& website) {
+    return searchBSTNode(bst->root, website);
+}
+
+// Find minimum value node in BST
+BSTNode* findMinBSTNode(BSTNode* node) {
+    BSTNode* current = node;
+    while (current && current->left != 0) {
+        current = current->left;
+    }
+    return current;
+}
+
+// Delete node from BST
+BSTNode* deleteBSTNode(BSTNode* root, const string& website) {
+    if (root == 0) return root;
+    
+    if (website < root->website) {
+        root->left = deleteBSTNode(root->left, website);
+    } else if (website > root->website) {
+        root->right = deleteBSTNode(root->right, website);
+    } else {
+        // Node found
+        if (root->left == 0) {
+            BSTNode* temp = root->right;
+            delete root;
+            return temp;
+        } else if (root->right == 0) {
+            BSTNode* temp = root->left;
+            delete root;
+            return temp;
+        }
+        
+        // Node with two children
+        BSTNode* temp = findMinBSTNode(root->right);
+        root->website = temp->website;
+        root->credential_ptr = temp->credential_ptr;
+        root->right = deleteBSTNode(root->right, temp->website);
+    }
+    return root;
+}
+
+// Delete from BST (wrapper function)
+bool deleteBST(BinarySearchTree* bst, const string& website) {
+    int initial_size = bst->size;
+    bst->root = deleteBSTNode(bst->root, website);
+    if (bst->size == initial_size) {
+        bst->size--; // Decrement only if node was found and deleted
+        return true;
+    }
+    return false;
+}
+
+// In-order traversal of BST
+void inorderTraversal(BSTNode* root) {
+    if (root != 0) {
+        inorderTraversal(root->left);
+        cout << "  • " << root->website << endl;
+        inorderTraversal(root->right);
+    }
+}
+
+// Display BST structure
+void displayBST(BinarySearchTree* bst) {
+    cout << "\n=== BINARY SEARCH TREE STRUCTURE (" << bst->size << " items) ===" << endl;
+    cout << "Websites in alphabetical order:" << endl;
+    
+    if (bst->root == 0) {
+        cout << "BST is empty." << endl;
+        return;
+    }
+    
+    inorderTraversal(bst->root);
+}
+
+// Free BST memory
+void freeBSTNode(BSTNode* node) {
+    if (node == 0) return;
+    
+    freeBSTNode(node->left);
+    freeBSTNode(node->right);
+    delete node;
+}
+
+void freeBST(BinarySearchTree* bst) {
+    freeBSTNode(bst->root);
+    bst->root = 0;
+    bst->size = 0;
+}
+
 // ==================== LINKED LIST FUNCTIONS ====================
 
 // Initialize linked list
@@ -154,7 +312,7 @@ void addBeginning(LinkedList* list, Credential* cred) {
     list->size++;
 }
 
-// Search for credential by website
+// Search for credential by website (linear search - kept for backward compatibility)
 Credential* searchCredential(LinkedList* list, const string& website) {
     Credential* current = list->head;
     
@@ -412,12 +570,13 @@ void showMenu() {
     cout << "          SECURCORE PASSWORD MANAGER       " << endl;
     cout << "-------------------------------------------" << endl;
     cout << "1. Add New Credential" << endl;
-    cout << "2. Search Credential" << endl;
+    cout << "2. Search Credential (BST Fast Search)" << endl;
     cout << "3. Delete Credential" << endl;
-    cout << "4. Display All Credentials" << endl;
-    cout << "5. View Operation History (Stack)" << endl;
-    cout << "6. View Audit Trail (Queue)" << endl;
-    cout << "7. Clear All Data" << endl;
+    cout << "4. Display All Credentials (Linked List)" << endl;
+    cout << "5. Display BST Structure (Alphabetical)" << endl;
+    cout << "6. View Operation History (Stack)" << endl;
+    cout << "7. View Audit Trail (Queue)" << endl;
+    cout << "8. Clear All Data" << endl;
     cout << "0. Exit" << endl;
     cout << "-------------------------------------------" << endl;
 }
@@ -429,17 +588,20 @@ int main() {
     cout << "     CS221 Data Structures Project         " << endl;
     cout << "-------------------------------------------" << endl;
     cout << "Data Structures Used:" << endl;
-    cout << "  � Linked Lists (addBeginning/addEnd)" << endl;
-    cout << "  � Stacks (LIFO for undo operations)" << endl;
-    cout << "  � Queues (FIFO for audit trail)" << endl;
+    cout << "  • Linked Lists (addBeginning/addEnd)" << endl;
+    cout << "  • Binary Search Trees (Fast Search O(log n))" << endl;
+    cout << "  • Stacks (LIFO for undo operations)" << endl;
+    cout << "  • Queues (FIFO for audit trail)" << endl;
     cout << "-------------------------------------------" << endl;
     
     // Initialize data structures
     LinkedList cred_list;
+    BinarySearchTree cred_tree;
     OperationStack op_stack;
     AuditQueue audit_queue;
     
     initLinkedList(&cred_list);
+    initBST(&cred_tree);
     initStack(&op_stack);
     initQueue(&audit_queue);
     
@@ -479,39 +641,48 @@ int main() {
                 Credential* new_cred = createCredential(website, username, hash);
                 if (new_cred) {
                     if (addChoice == 1) {
-                        // Add at end
+                        // Add at end of linked list
                         addEnd(&cred_list, new_cred);
+                        // Insert into BST for fast search
+                        insertBST(&cred_tree, website, new_cred);
+                        
                         pushOperation(&op_stack, "ADD at End", new_cred);
                         string audit_desc = "Added credential at end for " + website;
                         enqueueEvent(&audit_queue, "ADD_END", audit_desc);
-                        cout << "\n? Credential added at END successfully!" << endl;
+                        cout << "\n Credential added at END successfully!" << endl;
                     } else if (addChoice == 2) {
-                        // Add at beginning
+                        // Add at beginning of linked list
                         addBeginning(&cred_list, new_cred);
+                        // Insert into BST for fast search
+                        insertBST(&cred_tree, website, new_cred);
+                        
                         pushOperation(&op_stack, "ADD at Beginning", new_cred);
                         string audit_desc = "Added credential at beginning for " + website;
                         enqueueEvent(&audit_queue, "ADD_BEGIN", audit_desc);
-                        cout << "\n? Credential added at BEGINNING successfully!" << endl;
+                        cout << "\n Credential added at BEGINNING successfully!" << endl;
                     } else {
-                        cout << "\n? Invalid choice. Added at end by default." << endl;
+                        cout << "\n Invalid choice. Added at end by default." << endl;
                         addEnd(&cred_list, new_cred);  // Default to end
+                        insertBST(&cred_tree, website, new_cred);
                     }
                 }
                 break;
             }
                 
-            case 2: { // Search
+            case 2: { // Search using BST (Fast Search)
                 string website;
                 
                 cout << "\nEnter website to search: ";
                 getline(cin, website);
                 
-                Credential* found = searchCredential(&cred_list, website);
-                if (found) {
-                    cout << "\n? Credential Found:" << endl;
-                    displayCredential(found);
+                // Search using BST (O(log n) time)
+                BSTNode* foundNode = searchBST(&cred_tree, website);
+                
+                if (foundNode && foundNode->credential_ptr) {
+                    cout << "\n Credential Found (using BST):" << endl;
+                    displayCredential(foundNode->credential_ptr);
                 } else {
-                    cout << "\n? Credential not found." << endl;
+                    cout << "\n Credential not found." << endl;
                 }
                 break;
             }
@@ -522,9 +693,11 @@ int main() {
                 cout << "\nEnter website to delete: ";
                 getline(cin, website);
                 
-                Credential* to_delete = searchCredential(&cred_list, website);
-                if (to_delete) {
-                    displayCredential(to_delete);
+                // Search using BST first
+                BSTNode* foundNode = searchBST(&cred_tree, website);
+                
+                if (foundNode && foundNode->credential_ptr) {
+                    displayCredential(foundNode->credential_ptr);
                     
                     cout << "\nAre you sure you want to delete this credential? (y/n): ";
                     char confirm;
@@ -532,37 +705,45 @@ int main() {
                     cin.ignore();
                     
                     if (confirm == 'y' || confirm == 'Y') {
+                        // Delete from linked list
                         if (deleteCredential(&cred_list, website)) {
-                            pushOperation(&op_stack, "DELETE Credential", to_delete);
+                            // Delete from BST
+                            deleteBST(&cred_tree, website);
+                            
+                            pushOperation(&op_stack, "DELETE Credential", foundNode->credential_ptr);
                             
                             string audit_desc = "Deleted credential for " + website;
                             enqueueEvent(&audit_queue, "DELETE", audit_desc);
                             
-                            cout << "\n? Credential deleted successfully." << endl;
-                            freeCredential(to_delete);
+                            cout << "\n Credential deleted successfully from both structures." << endl;
+                            freeCredential(foundNode->credential_ptr);
                         }
                     } else {
                         cout << "\nDeletion cancelled." << endl;
                     }
                 } else {
-                    cout << "\n? Credential not found." << endl;
+                    cout << "\n✗ Credential not found." << endl;
                 }
                 break;
             }
                 
-            case 4: // Display all
+            case 4: // Display all credentials from linked list
                 displayAllCredentials(&cred_list);
                 break;
                 
-            case 5: // Operation history
+            case 5: // Display BST structure
+                displayBST(&cred_tree);
+                break;
+                
+            case 6: // Operation history
                 displayStack(&op_stack);
                 break;
                 
-            case 6: // Audit trail
+            case 7: // Audit trail
                 displayQueue(&audit_queue);
                 break;
                 
-            case 7: { // Clear all data
+            case 8: { // Clear all data
                 cout << "\nAre you sure you want to clear ALL data? (y/n): ";
                 char confirm;
                 cin >> confirm;
@@ -570,14 +751,16 @@ int main() {
                 
                 if (confirm == 'y' || confirm == 'Y') {
                     freeLinkedList(&cred_list);
+                    freeBST(&cred_tree);
                     freeStack(&op_stack);
                     freeQueue(&audit_queue);
                     
                     initLinkedList(&cred_list);
+                    initBST(&cred_tree);
                     initStack(&op_stack);
                     initQueue(&audit_queue);
                     
-                    cout << "\n? All data cleared." << endl;
+                    cout << "\n All data cleared from all structures." << endl;
                 } else {
                     cout << "\nClear operation cancelled." << endl;
                 }
@@ -589,7 +772,7 @@ int main() {
                 break;
                 
             default:
-                cout << "\n? Invalid choice. Please try again." << endl;
+                cout << "\n Invalid choice. Please try again." << endl;
         }
         
         if (choice != 0) {
@@ -601,6 +784,7 @@ int main() {
     
     // Cleanup before exit
     freeLinkedList(&cred_list);
+    freeBST(&cred_tree);
     freeStack(&op_stack);
     freeQueue(&audit_queue);
     
@@ -608,4 +792,3 @@ int main() {
     
     return 0;
 }
-
